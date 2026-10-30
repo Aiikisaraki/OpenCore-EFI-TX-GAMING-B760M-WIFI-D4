@@ -191,7 +191,7 @@ Hardware acceleration for the RTX 3060 is provided by the **third-party NullMoth
 - `NullMothSafe.efi` is included under `EFI/OC/Tools` as a recovery/safe-mode helper.
 
 ### macOS side (you must install this)
-1. Download the NullMoth NVIDIA driver package from the official site / repo (see Links).
+1. Download the NullMoth NVIDIA driver package (version **2.6.4 or newer**) from the official site / repo (see Links).
 2. Install from macOS:
    ```bash
    tar -xzf nullmoth-nvidia-<version>.tar.gz
@@ -205,8 +205,9 @@ Hardware acceleration for the RTX 3060 is provided by the **third-party NullMoth
   onboard **Realtek ALC897** (7.1CH, SPDIF-out, Headphones) and **NVIDIA Audio** (HDMI/DP).
   Select any of them in **System Settings → Sound**. `AppleALC`/`NMHDA` are bundled but not
   needed on this build.
-- **Chrome / Edge fall back to CPU rendering** by default (no GPU compositing in those
-  browsers); Safari and most native apps use the GPU fine.
+- **Chrome / Edge are fully GPU-accelerated** with NullMoth driver **2.6.4+**: WebGL and
+  WebGL 2 work (ANGLE Metal Renderer on the RTX 3060). No CPU-rendering fallback on this
+  version.
 
 ---
 

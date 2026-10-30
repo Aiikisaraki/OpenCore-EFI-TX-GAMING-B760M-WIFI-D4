@@ -189,7 +189,7 @@ RTX 3060 的硬件加速由**第三方 NullMoth NVIDIA 驱动**提供。
 - `NullMothSafe.efi` 已放入 `EFI/OC/Tools`，作为恢复/安全模式辅助工具。
 
 ### macOS 侧（需自行安装）
-1. 从官网 / 仓库下载 NullMoth NVIDIA 驱动包（见链接）。
+1. 从官网 / 仓库下载 NullMoth NVIDIA 驱动包（**2.6.4 或更新**，见链接）。
 2. 在 macOS 中安装：
    ```bash
    tar -xzf nullmoth-nvidia-<version>.tar.gz
@@ -202,8 +202,8 @@ RTX 3060 的硬件加速由**第三方 NullMoth NVIDIA 驱动**提供。
 - **所有声卡均正常**，由随附的 `VoodooHDA_NV.kext`（NullMoth 的 Voodoo HDA）统一驱动：
   板载 **Realtek ALC897**（7.1CH、SPDIF-out、耳机）与 **NVIDIA Audio**（HDMI/DP）都可选。
   在 **系统设置 → 声音** 中任选即可。`AppleALC`/`NMHDA` 随附但本版本无需使用。
-- **Chrome / Edge 默认回退到 CPU 渲染**（这些浏览器无 GPU 合成）；Safari 及多数原生
-  应用可正常使用 GPU。
+- **Chrome / Edge 已完整支持 GPU 加速**（NullMoth 驱动 **2.6.4+**）：WebGL / WebGL 2
+  正常（ANGLE Metal Renderer，RTX 3060），本版本不再回退 CPU 渲染。
 
 ---
 
