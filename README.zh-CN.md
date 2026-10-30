@@ -39,7 +39,7 @@
 | 有线网卡       | 瑞昱 RTL8125 2.5GbE —— `RTL812xLucy.kext`                         |
 | Wi‑Fi          | 英特尔 AX201（CNVi）—— `AirportItlwm-Tahoe.kext`（+ `itlwm.kext`）|
 | 蓝牙           | 英特尔 AX201 —— `IntelBluetoothFirmware` + `IntelBTPatcher` + `BlueToolFixup` |
-| 音频           | `VoodooHDA_NV.kext`（HDMI/DP「NVIDIA Audio」已验证；AppleALC/NMHDA 随附但禁用） |
+| 音频           | `VoodooHDA_NV.kext` —— 板载 ALC897（7.1CH / SPDIF / 耳机）与 NVIDIA HDMI 音频均正常 |
 | 存储           | NVMe SSD —— `NVMeFix.kext`                                        |
 | **系统**       | **macOS 26.7.2 Tahoe（25G332）—— 已测试**                         |
 
@@ -63,8 +63,7 @@ nvfbsample=1 gfxrst=4
 | 有线网（2.5G）       | ✅ `RTL812xLucy.kext`                                        |
 | Wi‑Fi（AX201）       | ✅ `AirportItlwm-Tahoe.kext`（原生菜单）+ `itlwm.kext` 启用   |
 | 蓝牙（AX201）        | ✅ `IntelBluetoothFirmware` + `IntelBTPatcher` + `BlueToolFixup` |
-| 音频（HDMI/DP）      | ✅ `VoodooHDA_NV.kext` →「NVIDIA Audio」（2ch，44.1kHz）      |
-| 音频（ALC897 模拟）  | ⚠️ `AppleALC`/`NMHDA` 随附但**禁用**——需要时自行启用          |
+| 音频（全部）         | ✅ `VoodooHDA_NV.kext` —— ALC897（7.1CH、SPDIF-out、耳机）+ NVIDIA Audio（HDMI/DP） |
 | USB（定制）          | ✅ `USBToolBox.kext` + `UTBDefault.kext` + SSDT-USBX         |
 | NVIDIA RTX 3060      | ✅ 经 NullMoth 驱动加速；✅ HDMI/DP 音频可用                  |
 
@@ -200,9 +199,9 @@ RTX 3060 的硬件加速由**第三方 NullMoth NVIDIA 驱动**提供。
 3. 重启。安装完成后，RTX 3060 即可提供加速渲染。
 
 ### 说明（NullMoth）
-- **HDMI / DisplayPort 音频可用**，通过随附的 `VoodooHDA_NV.kext` 提供。输出设备显示为
-  **“NVIDIA Audio”**（厂商：Voodoo，2 声道，44.1 kHz），在 **系统设置 → 声音** 中选择即可。
-  `AppleALC`/`NMHDA` 随附但已禁用。
+- **所有声卡均正常**，由随附的 `VoodooHDA_NV.kext`（NullMoth 的 Voodoo HDA）统一驱动：
+  板载 **Realtek ALC897**（7.1CH、SPDIF-out、耳机）与 **NVIDIA Audio**（HDMI/DP）都可选。
+  在 **系统设置 → 声音** 中任选即可。`AppleALC`/`NMHDA` 随附但本版本无需使用。
 - **Chrome / Edge 默认回退到 CPU 渲染**（这些浏览器无 GPU 合成）；Safari 及多数原生
   应用可正常使用 GPU。
 

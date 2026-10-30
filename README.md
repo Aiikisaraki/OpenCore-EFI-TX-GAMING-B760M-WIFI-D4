@@ -41,7 +41,7 @@ running **macOS 26 Tahoe** as a daily-driver Hackintosh.
 | Ethernet       | Realtek RTL8125 2.5GbE — `RTL812xLucy.kext`                       |
 | Wi‑Fi          | Intel AX201 (CNVi) — `AirportItlwm-Tahoe.kext` (+ `itlwm.kext`)   |
 | Bluetooth      | Intel AX201 — `IntelBluetoothFirmware` + `IntelBTPatcher` + `BlueToolFixup` |
-| Audio          | `VoodooHDA_NV.kext` (HDMI/DP "NVIDIA Audio" confirmed; AppleALC/NMHDA bundled but disabled) |
+| Audio          | `VoodooHDA_NV.kext` — onboard ALC897 (7.1CH / SPDIF / Headphones) **and** NVIDIA HDMI audio, all working |
 | Storage        | NVMe SSD — `NVMeFix.kext`                                         |
 | **OS**         | **macOS 26.7.2 Tahoe (25G332) — tested**                          |
 
@@ -65,8 +65,7 @@ nvfbsample=1 gfxrst=4
 | Ethernet (2.5G)       | ✅ `RTL812xLucy.kext`                                             |
 | Wi‑Fi (AX201)         | ✅ `AirportItlwm-Tahoe.kext` (native menu) + `itlwm.kext` enabled  |
 | Bluetooth (AX201)     | ✅ `IntelBluetoothFirmware` + `IntelBTPatcher` + `BlueToolFixup`   |
-| Audio (HDMI/DP)       | ✅ `VoodooHDA_NV.kext` → "NVIDIA Audio" (2ch, 44.1 kHz)            |
-| Audio (ALC897 analog) | ⚠️ `AppleALC`/`NMHDA` bundled but **disabled** — enable if needed  |
+| Audio (all)           | ✅ `VoodooHDA_NV.kext` — ALC897 (7.1CH, SPDIF-out, Headphones) + NVIDIA Audio (HDMI/DP) |
 | USB (mapping)         | ✅ `USBToolBox.kext` + `UTBDefault.kext` + SSDT-USBX               |
 | NVIDIA RTX 3060       | ✅ Acceleration via NullMoth driver; ✅ HDMI/DP audio              |
 
@@ -202,9 +201,10 @@ Hardware acceleration for the RTX 3060 is provided by the **third-party NullMoth
 3. Reboot. After install, the RTX 3060 provides accelerated rendering.
 
 ### Notes (NullMoth)
-- **HDMI / DisplayPort audio WORKS** through the bundled `VoodooHDA_NV.kext`. The output
-  appears as **"NVIDIA Audio"** (vendor: Voodoo, 2 channels, 44.1 kHz). Select it in
-  **System Settings → Sound**. `AppleALC`/`NMHDA` are present but disabled.
+- **All audio works** through the bundled `VoodooHDA_NV.kext` (NullMoth's Voodoo HDA):
+  onboard **Realtek ALC897** (7.1CH, SPDIF-out, Headphones) and **NVIDIA Audio** (HDMI/DP).
+  Select any of them in **System Settings → Sound**. `AppleALC`/`NMHDA` are bundled but not
+  needed on this build.
 - **Chrome / Edge fall back to CPU rendering** by default (no GPU compositing in those
   browsers); Safari and most native apps use the GPU fine.
 
