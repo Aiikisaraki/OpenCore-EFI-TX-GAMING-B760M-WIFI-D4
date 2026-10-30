@@ -1,18 +1,21 @@
-# OpenCore EFI —— 华硕 TX GAMING B760M WIFI D4（i5-12600KF + RTX 3060）
+# OpenCore EFI —— 华硕 TX GAMING B760M WIFI D4（i5-12600KF + RTX 3060 12GB）
 
 一套可直接使用的 OpenCore EFI，适用于 **华硕 TX GAMING B760M WIFI D4** 主板，
-搭配 **Intel 酷睿 i5-12600KF（Alder Lake）** 与 **NVIDIA RTX 3060（12GB）**，
-用于黑苹果（Hackintosh）安装 macOS。
+搭配 **Intel 酷睿 i5-12600KF（Alder Lake）** 与 **NVIDIA RTX 3060 12GB**，
+以 **macOS 26 Tahoe** 作为日常主力黑苹果系统运行。
 
-> 本 EFI 由 **NullMoth「1401 for Windows」** 版 OpenCore 生成，针对 **macOS 15 Sequoia**
-> 调校（主力、已测试）。另有一份实验性分支/变体，额外提供适用于 macOS 26 Tahoe 的
-> AirportItlwm 构建。
+> **分支说明**
+> - **`main`**（当前分支）= **macOS 26 Tahoe** 版本 —— 当前正在运行、已验证。
+> - **`macos-15-sequoia`** 分支 = 更早的 **macOS 15 Sequoia** 版本。
+>
+> 本 EFI 由 **NullMoth「1401 for Windows」** 版 OpenCore 生成，针对
+> **macOS 26.7.2（Build 25G332）** 调校。
 
 ---
 
 ## ⚠️ 开始前的重要说明
 
-1. **本仓库中的 `config.plist` 已做脱敏处理。** 原始的 SMBIOS 序列号、MLB、SystemUUID
+1. **本仓库中的 `config.plist` 已做脱敏处理。** 原始 SMBIOS 序列号、MLB、SystemUUID
    与 ROM 已被清空，以保护作者隐私并避免序列号冲突。**首次启动前你必须自己生成 SMBIOS**
    （见[生成你自己的 SMBIOS](#生成你自己的-smbios)），否则 macOS / iServices 无法正常工作，
    且可能与他人序列号冲突。
@@ -28,21 +31,24 @@
 | 部件           | 型号                                                              |
 | -------------- | ----------------------------------------------------------------- |
 | 主板           | 华硕 TX GAMING B760M WIFI D4（B760，LGA1700，Raptor Lake PCH）     |
-| BIOS / SMBIOS  | MacPro7,1（SecureBootModel：Disabled）                            |
+| BIOS           | 在 **BIOS 1836** 上验证通过                                       |
+| SMBIOS         | MacPro7,1（SecureBootModel：Disabled）                            |
 | CPU            | Intel 酷睿 i5-12600KF（Alder Lake-S，无核显）                      |
-| 显卡           | NVIDIA GeForce RTX 3060 12GB（Ampere）—— 经 NullMoth 驱动加速     |
+| 显卡           | NVIDIA GeForce RTX 3060 **12GB**（Ampere）—— 经 NullMoth 驱动加速 |
 | 内存           | DDR4（请在自己的 SMBIOS / SystemMemoryStatus 中设置）             |
 | 有线网卡       | 瑞昱 RTL8125 2.5GbE —— `RTL812xLucy.kext`                         |
-| Wi‑Fi / 蓝牙   | 英特尔 AX201（CNVi）—— `itlwm.kext` + `IntelBluetoothFirmware`    |
-| 声卡           | 瑞昱 ALC897 —— `AppleALC.kext` + NullMoth `NMHDA.kext` / `VoodooHDA_NV.kext` |
+| Wi‑Fi          | 英特尔 AX201（CNVi）—— `AirportItlwm-Tahoe.kext`（+ `itlwm.kext`）|
+| 蓝牙           | 英特尔 AX201 —— `IntelBluetoothFirmware` + `IntelBTPatcher` + `BlueToolFixup` |
+| 音频           | `VoodooHDA_NV.kext`（HDMI/DP「NVIDIA Audio」已验证；AppleALC/NMHDA 随附但禁用） |
 | 存储           | NVMe SSD —— `NVMeFix.kext`                                        |
+| **系统**       | **macOS 26.7.2 Tahoe（25G332）—— 已测试**                         |
 
 ### 启动参数（已配置好）
 
 ```
--v debug=0x100 nvfb=1 nvaccel=1 nvfbheads=4 -nvkmsnosmooth
+debug=0x100 nvfb=1 nvaccel=1 nvfbheads=4 -nvkmsnosmooth
 amfi_get_out_of_my_way=0x1 amfi=0x80 ipc_control_port_options=0
-nvfbsample=1 gfxrst=4 -nvoff
+nvfbsample=1 gfxrst=4
 ```
 
 ---
@@ -51,15 +57,16 @@ nvfbsample=1 gfxrst=4 -nvoff
 
 | 功能                 | 状态 / 说明                                                  |
 | -------------------- | ----------------------------------------------------------- |
-| macOS 15 Sequoia     | ✅ 已测试                                                    |
-| macOS 26 Tahoe       | ⚠️ 实验性（请使用带 Sequoia/Tahoe AirportItlwm 的变体）     |
-| CPU 电源管理         | ✅ `CpuTopologyRebuild.kext`、`SMCProcessor`、`SMCSuperIO`   |
+| **macOS 26 Tahoe**   | ✅ **已测试（26.7.2）** —— 当前分支                          |
+| macOS 15 Sequoia     | ✅ 见 `macos-15-sequoia` 分支                                |
+| CPU 电源管理         | ✅ `CpuTopologyRebuild`、`SMCProcessor`、`SMCSuperIO`        |
 | 有线网（2.5G）       | ✅ `RTL812xLucy.kext`                                        |
-| Wi‑Fi（AX201）       | ✅ `itlwm.kext` + HeliPort 应用（Sequoia）                   |
+| Wi‑Fi（AX201）       | ✅ `AirportItlwm-Tahoe.kext`（原生菜单）+ `itlwm.kext` 启用   |
 | 蓝牙（AX201）        | ✅ `IntelBluetoothFirmware` + `IntelBTPatcher` + `BlueToolFixup` |
-| 音频（ALC897）       | ✅ `AppleALC.kext` + NullMoth 音频 kext                      |
+| 音频（HDMI/DP）      | ✅ `VoodooHDA_NV.kext` →「NVIDIA Audio」（2ch，44.1kHz）      |
+| 音频（ALC897 模拟）  | ⚠️ `AppleALC`/`NMHDA` 随附但**禁用**——需要时自行启用          |
 | USB（定制）          | ✅ `USBToolBox.kext` + `UTBDefault.kext` + SSDT-USBX         |
-| NVIDIA RTX 3060      | ✅ 经 NullMoth 驱动加速；✅ HDMI/DP 音频（`VoodooHDA_NV`）    |
+| NVIDIA RTX 3060      | ✅ 经 NullMoth 驱动加速；✅ HDMI/DP 音频可用                  |
 
 ---
 
@@ -165,6 +172,9 @@ sudo diskutil mount diskNs1
 在主板启动菜单中选择 OpenCore 引导项（或 `BOOTx64.efi`）。首次启动时，先在
 OpenCore 选择界面用一次 **Reset NVRAM**，再启动 macOS。
 
+> 说明：作者的分区上还存在 `EFI/APPLE/`（Apple 的 DisplayPort 固件升级器），
+> 它**不属于 OpenCore**、无需使用，本仓库已将其剔除。
+
 ---
 
 ## 显卡 —— NVIDIA RTX 3060 + NullMoth 驱动
@@ -174,9 +184,9 @@ RTX 3060 的硬件加速由**第三方 NullMoth NVIDIA 驱动**提供。
 
 ### EFI 侧（已完成）
 - `config.plist` 的启动参数已包含 NullMoth 所需开关（`nvfb=1 nvaccel=1 nvfbheads=4
-  -nvkmsnosmooth nvfbsample=1 gfxrst=4 -nvoff`）以及 AMFI 禁用
+  -nvkmsnosmooth nvfbsample=1 gfxrst=4`）以及 AMFI 禁用
   （`amfi_get_out_of_my_way=0x1 amfi=0x80`）。
-- `WhateverGreen.kext` 与 `NMHDA.kext` / `VoodooHDA_NV.kext` 已随 `EFI/OC/Kexts` 提供。
+- `WhateverGreen.kext`、`NMHDA.kext`、`VoodooHDA_NV.kext` 已随 `EFI/OC/Kexts` 提供。
 - `NullMothSafe.efi` 已放入 `EFI/OC/Tools`，作为恢复/安全模式辅助工具。
 
 ### macOS 侧（需自行安装）
@@ -189,10 +199,10 @@ RTX 3060 的硬件加速由**第三方 NullMoth NVIDIA 驱动**提供。
    ```
 3. 重启。安装完成后，RTX 3060 即可提供加速渲染。
 
-### 已知说明（NullMoth）
-- **HDMI / DisplayPort 音频在本机是可用的**，通过随附的 `VoodooHDA_NV.kext`
-  （NullMoth 的 Voodoo HDA）提供。输出设备显示为 **“NVIDIA Audio”**
-  （厂商：Voodoo，2 声道，44.1 kHz），在 **系统设置 → 声音** 中选择即可。
+### 说明（NullMoth）
+- **HDMI / DisplayPort 音频可用**，通过随附的 `VoodooHDA_NV.kext` 提供。输出设备显示为
+  **“NVIDIA Audio”**（厂商：Voodoo，2 声道，44.1 kHz），在 **系统设置 → 声音** 中选择即可。
+  `AppleALC`/`NMHDA` 随附但已禁用。
 - **Chrome / Edge 默认回退到 CPU 渲染**（这些浏览器无 GPU 合成）；Safari 及多数原生
   应用可正常使用 GPU。
 
@@ -200,10 +210,13 @@ RTX 3060 的硬件加速由**第三方 NullMoth NVIDIA 驱动**提供。
 
 ## Wi‑Fi / 蓝牙（Intel AX201）
 
-在 **macOS 15 Sequoia** 下，原生 `AirportItlwm` 仅支持到 Sonoma，因此本 EFI 使用
-**`itlwm.kext` + HeliPort 应用** 实现 Wi‑Fi。**切勿**同时加载 `itlwm` 与 `AirportItlwm`。
-对于 macOS 26 Tahoe，请使用附带 `AirportItlwm-Tahoe.kext` 的变体。蓝牙由
-`IntelBluetoothFirmware` + `IntelBTPatcher` + `BlueToolFixup` 提供。
+在 **macOS 26 Tahoe** 下，原生 Wi‑Fi 菜单由 **`AirportItlwm-Tahoe.kext`** 提供；
+**`itlwm.kext`** 也同时启用（配套 HeliPort 应用，作为替代/伴生）。通用的
+`AirportItlwm.kext` 在本版本中**禁用**——不要把它和 `itlwm` 同时启用。
+蓝牙由 `IntelBluetoothFirmware` + `IntelBTPatcher` + `BlueToolFixup` 提供。
+
+> 若要用 macOS 15 Sequoia，请使用 `macos-15-sequoia` 分支（该版本使用 Sequoia 时期的
+> itlwm/AirportItlwm 组合）。
 
 ---
 
@@ -216,8 +229,9 @@ EFI/
 └── OC/
     ├── ACPI/      (SSDT-SBUS、SSDT-EC、SSDT-PLUG-ALT、SSDT-RTCAWAC、SSDT-USB-Reset、SSDT-USBX)
     ├── Drivers/   (HfsPlus、OpenCanopy、OpenRuntime、ResetNvramEntry)
-    ├── Kexts/     (Lilu、VirtualSMC、AppleALC、WhateverGreen、NMHDA、VoodooHDA_NV、
-    │               RTL812xLucy、itlwm、IntelBluetoothFirmware、USBToolBox、NVMeFix 等)
+    ├── Kexts/     (Lilu、VirtualSMC、WhateverGreen、VoodooHDA_NV、NMHDA、AppleALC、
+    │               RTL812xLucy、AirportItlwm-Tahoe、itlwm、IntelBluetoothFirmware、
+    │               USBToolBox、NVMeFix、CpuTopologyRebuild 等)
     ├── Resources/ (OpenCanopy 主题：Audio、Font、Image、Label)
     ├── Tools/     (NullMothSafe.efi)
     ├── OpenCore.efi

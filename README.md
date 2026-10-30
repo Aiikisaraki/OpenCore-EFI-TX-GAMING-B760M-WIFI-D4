@@ -1,71 +1,78 @@
-# OpenCore EFI — ASUS TUF/TX GAMING B760M WIFI D4 (i5-12600KF + RTX 3060)
+# OpenCore EFI — ASUS TX GAMING B760M WIFI D4 (i5-12600KF + RTX 3060 12 GB)
 
 A ready-to-use OpenCore EFI for the **ASUS TX GAMING B760M WIFI D4** motherboard,
-paired with an **Intel Core i5-12600KF (Alder Lake)** and an **NVIDIA RTX 3060 (12 GB)**,
-running macOS on a Hackintosh.
+paired with an **Intel Core i5-12600KF (Alder Lake)** and an **NVIDIA RTX 3060 12 GB**,
+running **macOS 26 Tahoe** as a daily-driver Hackintosh.
 
-> This EFI was generated with the **NullMoth "1401 for Windows"** OpenCore build and is
-> tuned for macOS **15 Sequoia** (primary, tested). A separate experimental branch/variant
-> adds AirportItlwm builds for macOS 26 Tahoe.
+> **Branch layout**
+> - **`main`** (this branch) = **macOS 26 Tahoe** build — the currently running, verified setup.
+> - **`macos-15-sequoia`** branch = the earlier **macOS 15 Sequoia** build.
+>
+> Generated with the **NullMoth "1401 for Windows"** OpenCore build, tuned for
+> **macOS 26.7.2 (build 25G332)**.
 
 ---
 
 ## ⚠️ Before you start — important
 
 1. **The `config.plist` in this repo has been SANITIZED.** The original SMBIOS serial
-   number, MLB, SystemUUID and ROM have been blanked to protect the author's identity and
-   to avoid serial collisions. **You MUST generate your own SMBIOS** (see
+   number, MLB, SystemUUID and ROM were blanked to protect the author's identity and to
+   avoid serial collisions. **You MUST generate your own SMBIOS** (see
    [Generate your SMBIOS](#generate-your-smbios)) before the first boot, or macOS/iServices
    will not work and you risk colliding with someone else's serial.
 2. This is a third-party, community-maintained configuration. **Use at your own risk.**
-   Flashing/incorrect EFI can prevent a machine from booting — always keep a known-good
-   backup of your working EFI on a separate USB stick.
-3. The NVIDIA graphics acceleration relies on the **third-party NullMoth NVIDIA driver**,
-   which is NOT open-source Apple code. Read the [Graphics](#graphics-nvidia-rtx-3060--nullmoth) section carefully.
+   A wrong EFI can prevent the machine from booting — always keep a known-good backup of
+   your working EFI on a separate USB stick.
+3. NVIDIA acceleration relies on the **third-party NullMoth NVIDIA driver**, which is NOT
+   Apple code. Read the [Graphics](#graphics--nvidia-rtx-3060--nullmoth-driver) section.
 
 ---
 
 ## Hardware specifications
 
-| Component      | Model                                                            |
-| -------------- | --------------------------------------------------------------- |
-| Motherboard    | ASUS TX GAMING B760M WIFI D4 (B760, LGA1700, Raptor Lake PCH)    |
-| BIOS / SMBIOS  | MacPro7,1 (SecureBootModel: Disabled)                           |
-| CPU            | Intel Core i5-12600KF (Alder Lake-S, no iGPU)                   |
-| GPU            | NVIDIA GeForce RTX 3060 12 GB (Ampere) — via NullMoth driver    |
-| Memory         | DDR4 (set in your own SMBIOS / SystemMemoryStatus)              |
-| Ethernet       | Realtek RTL8125 2.5GbE — `RTL812xLucy.kext`                     |
-| Wi‑Fi / BT     | Intel AX201 (CNVi) — `itlwm.kext` + `IntelBluetoothFirmware`    |
-| Audio          | Realtek ALC897 — `AppleALC.kext` + NullMoth `NMHDA.kext` / `VoodooHDA_NV.kext` |
-| Storage        | NVMe SSD — `NVMeFix.kext`                                       |
+| Component      | Model                                                              |
+| -------------- | ----------------------------------------------------------------- |
+| Motherboard    | ASUS TX GAMING B760M WIFI D4 (B760, LGA1700, Raptor Lake PCH)      |
+| BIOS           | Validated on BIOS **1836**                                        |
+| SMBIOS         | MacPro7,1 (SecureBootModel: Disabled)                             |
+| CPU            | Intel Core i5-12600KF (Alder Lake-S, no iGPU)                     |
+| GPU            | NVIDIA GeForce RTX 3060 **12 GB** (Ampere) — via NullMoth driver   |
+| Memory         | DDR4 (fill in your own SMBIOS / SystemMemoryStatus)               |
+| Ethernet       | Realtek RTL8125 2.5GbE — `RTL812xLucy.kext`                       |
+| Wi‑Fi          | Intel AX201 (CNVi) — `AirportItlwm-Tahoe.kext` (+ `itlwm.kext`)   |
+| Bluetooth      | Intel AX201 — `IntelBluetoothFirmware` + `IntelBTPatcher` + `BlueToolFixup` |
+| Audio          | `VoodooHDA_NV.kext` (HDMI/DP "NVIDIA Audio" confirmed; AppleALC/NMHDA bundled but disabled) |
+| Storage        | NVMe SSD — `NVMeFix.kext`                                         |
+| **OS**         | **macOS 26.7.2 Tahoe (25G332) — tested**                          |
 
 ### Boot arguments (already configured)
 
 ```
--v debug=0x100 nvfb=1 nvaccel=1 nvfbheads=4 -nvkmsnosmooth
+debug=0x100 nvfb=1 nvaccel=1 nvfbheads=4 -nvkmsnosmooth
 amfi_get_out_of_my_way=0x1 amfi=0x80 ipc_control_port_options=0
-nvfbsample=1 gfxrst=4 -nvoff
+nvfbsample=1 gfxrst=4
 ```
 
 ---
 
 ## What works
 
-| Feature            | Status / Notes                                                        |
-| ------------------ | -------------------------------------------------------------------- |
-| macOS 15 Sequoia   | ✅ Tested                                                            |
-| macOS 26 Tahoe     | ⚠️ Experimental (use the Sequoia/Tahoe AirportItlwm variant)         |
-| CPU power management | ✅ `CpuTopologyRebuild.kext`, `SMCProcessor`, `SMCSuperIO`          |
-| Ethernet (2.5G)    | ✅ `RTL812xLucy.kext`                                                |
-| Wi‑Fi (AX201)      | ✅ `itlwm.kext` + HeliPort app (Sequoia)                             |
-| Bluetooth (AX201)  | ✅ `IntelBluetoothFirmware` + `IntelBTPatcher` + `BlueToolFixup`     |
-| Audio (ALC897)     | ✅ `AppleALC.kext` + NullMoth audio kexts                            |
-| USB (mapping)      | ✅ `USBToolBox.kext` + `UTBDefault.kext` + SSDT-USBX                 |
-| NVIDIA RTX 3060    | ✅ Acceleration via NullMoth driver; ✅ HDMI/DP audio via `VoodooHDA_NV` |
+| Feature               | Status / Notes                                                    |
+| --------------------- | ----------------------------------------------------------------- |
+| **macOS 26 Tahoe**    | ✅ **Tested (26.7.2)** — this branch                              |
+| macOS 15 Sequoia      | ✅ Available on the `macos-15-sequoia` branch                      |
+| CPU power management  | ✅ `CpuTopologyRebuild`, `SMCProcessor`, `SMCSuperIO`              |
+| Ethernet (2.5G)       | ✅ `RTL812xLucy.kext`                                             |
+| Wi‑Fi (AX201)         | ✅ `AirportItlwm-Tahoe.kext` (native menu) + `itlwm.kext` enabled  |
+| Bluetooth (AX201)     | ✅ `IntelBluetoothFirmware` + `IntelBTPatcher` + `BlueToolFixup`   |
+| Audio (HDMI/DP)       | ✅ `VoodooHDA_NV.kext` → "NVIDIA Audio" (2ch, 44.1 kHz)            |
+| Audio (ALC897 analog) | ⚠️ `AppleALC`/`NMHDA` bundled but **disabled** — enable if needed  |
+| USB (mapping)         | ✅ `USBToolBox.kext` + `UTBDefault.kext` + SSDT-USBX               |
+| NVIDIA RTX 3060       | ✅ Acceleration via NullMoth driver; ✅ HDMI/DP audio              |
 
 ---
 
-## Prepare your SMBIOS
+## Generate your SMBIOS
 
 The shipped `config.plist` has empty serials. Generate a valid `MacPro7,1` identity:
 
@@ -167,6 +174,9 @@ Apply the settings in **[BIOS Settings](#bios-settings-asus-tx-gaming-b760m-wifi
 Select the OpenCore entry (or `BOOTx64.efi`) from your firmware boot menu. On first boot
 use the OpenCore picker's **Reset NVRAM** entry once, then boot macOS.
 
+> Note: `EFI/APPLE/` (Apple's DisplayPort firmware updater) exists on the author's live
+> partition but is **not part of OpenCore** and has been omitted here — it is not needed.
+
 ---
 
 ## Graphics — NVIDIA RTX 3060 + NullMoth driver
@@ -176,9 +186,9 @@ Hardware acceleration for the RTX 3060 is provided by the **third-party NullMoth
 
 ### EFI side (already done)
 - `config.plist` boot-args include the NullMoth switches (`nvfb=1 nvaccel=1 nvfbheads=4
-  -nvkmsnosmooth nvfbsample=1 gfxrst=4 -nvoff`) and AMFI disables
+  -nvkmsnosmooth nvfbsample=1 gfxrst=4`) and AMFI disables
   (`amfi_get_out_of_my_way=0x1 amfi=0x80`) required by the driver.
-- `WhateverGreen.kext` and `NMHDA.kext` / `VoodooHDA_NV.kext` ship in `EFI/OC/Kexts`.
+- `WhateverGreen.kext`, `NMHDA.kext` and `VoodooHDA_NV.kext` ship in `EFI/OC/Kexts`.
 - `NullMothSafe.efi` is included under `EFI/OC/Tools` as a recovery/safe-mode helper.
 
 ### macOS side (you must install this)
@@ -191,10 +201,10 @@ Hardware acceleration for the RTX 3060 is provided by the **third-party NullMoth
    ```
 3. Reboot. After install, the RTX 3060 provides accelerated rendering.
 
-### Known notes (NullMoth)
-- **HDMI / DisplayPort audio WORKS** on this setup through the bundled
-  `VoodooHDA_NV.kext` (NullMoth's Voodoo HDA). The output appears as **"NVIDIA Audio"**
-  (vendor: Voodoo, 2 channels, 44.1 kHz). Select it in **System Settings → Sound**.
+### Notes (NullMoth)
+- **HDMI / DisplayPort audio WORKS** through the bundled `VoodooHDA_NV.kext`. The output
+  appears as **"NVIDIA Audio"** (vendor: Voodoo, 2 channels, 44.1 kHz). Select it in
+  **System Settings → Sound**. `AppleALC`/`NMHDA` are present but disabled.
 - **Chrome / Edge fall back to CPU rendering** by default (no GPU compositing in those
   browsers); Safari and most native apps use the GPU fine.
 
@@ -202,11 +212,13 @@ Hardware acceleration for the RTX 3060 is provided by the **third-party NullMoth
 
 ## Wi‑Fi / Bluetooth (Intel AX201)
 
-On **macOS 15 Sequoia**, native `AirportItlwm` stops at Sonoma, so this EFI uses
-**`itlwm.kext` + the HeliPort app** for Wi‑Fi. Do **not** load both `itlwm` and
-`AirportItlwm` at the same time. For macOS 26 Tahoe, use the variant that ships
-`AirportItlwm-Tahoe.kext`. Bluetooth works via `IntelBluetoothFirmware` +
-`IntelBTPatcher` + `BlueToolFixup`.
+On **macOS 26 Tahoe** the native Wi‑Fi menu is provided by **`AirportItlwm-Tahoe.kext`**;
+**`itlwm.kext`** is also enabled as a companion/alternative (HeliPort app). The generic
+`AirportItlwm.kext` is **disabled** on this build — do not enable it together with `itlwm`.
+Bluetooth works via `IntelBluetoothFirmware` + `IntelBTPatcher` + `BlueToolFixup`.
+
+> For macOS 15 Sequoia, use the `macos-15-sequoia` branch (that build uses the Sequoia-era
+> itlwm/AirportItlwm set).
 
 ---
 
@@ -219,8 +231,9 @@ EFI/
 └── OC/
     ├── ACPI/      (SSDT-SBUS, SSDT-EC, SSDT-PLUG-ALT, SSDT-RTCAWAC, SSDT-USB-Reset, SSDT-USBX)
     ├── Drivers/   (HfsPlus, OpenCanopy, OpenRuntime, ResetNvramEntry)
-    ├── Kexts/     (Lilu, VirtualSMC, AppleALC, WhateverGreen, NMHDA, VoodooHDA_NV,
-    │               RTL812xLucy, itlwm, IntelBluetoothFirmware, USBToolBox, NVMeFix, ...)
+    ├── Kexts/     (Lilu, VirtualSMC, WhateverGreen, VoodooHDA_NV, NMHDA, AppleALC,
+    │               RTL812xLucy, AirportItlwm-Tahoe, itlwm, IntelBluetoothFirmware,
+    │               USBToolBox, NVMeFix, CpuTopologyRebuild, ...)
     ├── Resources/ (OpenCanopy theme: Audio, Font, Image, Label)
     ├── Tools/     (NullMothSafe.efi)
     ├── OpenCore.efi
