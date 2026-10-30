@@ -79,6 +79,64 @@ nvfbsample=1 gfxrst=4 -nvoff
 
 ---
 
+## BIOS 设置（华硕 TX GAMING B760M WIFI D4）
+
+先刷到已知可用的 BIOS —— 本 EFI 在 **BIOS 1836** 上验证通过。开机按 `Del` / `F2` 进入 BIOS，
+按下列项目设置（菜单名不同可用 `F9` 搜索）：
+
+**Boot / Security（启动与安全）**
+
+| 选项                               | 值 |
+| ---------------------------------- | -- |
+| 快速启动（Fast Boot）              | **关闭** |
+| 安全启动（Secure Boot）→ OS Type   | **Other OS**（或安全启动 **关闭**） |
+| CSM 兼容支持模块                   | **关闭**（纯 UEFI） |
+
+**Advanced → CPU Configuration（高级 → CPU 设置）**
+
+| 选项                                   | 值 |
+| -------------------------------------- | -- |
+| Intel Virtualization Technology (VT-x) | **开启** |
+| Intel VT-d                             | **开启**（由 `DisableIoMapper` quirk 处理） |
+| CFG Lock                               | 有则 **关闭**；没有则保持默认（已用 `AppleXcpmCfgLock` quirk 兜底） |
+| Intel SGX                              | **关闭**（如有） |
+
+**Advanced → System Agent (SA) Configuration（系统代理设置）**
+
+| 选项                 | 值 |
+| -------------------- | -- |
+| Above 4G Decoding    | **开启** |
+| Re-Size BAR Support  | **关闭**（最稳；确认显卡/驱动兼容再开） |
+
+**Advanced → PCH Storage Configuration（PCH 存储设置）**
+
+| 选项      | 值 |
+| --------- | -- |
+| SATA 模式 | **AHCI** |
+
+**Advanced → USB Configuration（USB 设置）**
+
+| 选项          | 值 |
+| ------------- | -- |
+| XHCI Hand-off | **开启** |
+
+**Advanced → PCH-FW / Trusted Computing（可信计算）**
+
+| 选项                                         | 值 |
+| -------------------------------------------- | -- |
+| Intel Platform Trust Technology (PTT / fTPM) | **关闭** |
+
+**Advanced → Onboard Devices Configuration（板载设备）**
+
+| 选项                          | 值 |
+| ----------------------------- | -- |
+| 串口 / 并口（Serial/Parallel）| **关闭**（避免 macOS 资源冲突） |
+
+按 `F10` 保存，然后从 U 盘 / OpenCore 引导项启动，安装前先在 OpenCore 选择界面按一次
+**Reset NVRAM**。
+
+---
+
 ## 安装 / 部署方法
 
 ### 1. 准备可启动的 macOS 安装盘
@@ -100,19 +158,8 @@ sudo diskutil mount diskNs1
 /Volumes/EFI/EFI/OC/...
 ```
 
-### 4. BIOS 设置（推荐）
-| 选项                       | 值                 |
-| -------------------------- | ------------------ |
-| 快速启动（Fast Boot）      | 关闭               |
-| 安全启动（Secure Boot）    | 关闭               |
-| CSM / 兼容支持模块         | 关闭（纯 UEFI）    |
-|  Above 4G Decoding         | 开启               |
-| SATA 模式                  | AHCI               |
-| XHCI Hand-off              | 开启               |
-| VT-d                       | 开启*（已由 quirk 处理） |
-| CFG Lock                   | 尽量关闭（已启用 `AppleXcpmCfgLock` quirk 作为兜底） |
-
-\* 已配置 `DisableIoMapper` 等相关 quirk，保留 VT-d 开启无碍。
+### 4. 配置 BIOS
+按上文 **《BIOS 设置》** 章节逐项设置。
 
 ### 5. 启动
 在主板启动菜单中选择 OpenCore 引导项（或 `BOOTx64.efi`）。首次启动时，先在

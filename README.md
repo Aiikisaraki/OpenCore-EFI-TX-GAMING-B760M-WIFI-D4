@@ -81,6 +81,64 @@ The shipped `config.plist` has empty serials. Generate a valid `MacPro7,1` ident
 
 ---
 
+## BIOS Settings (ASUS TX GAMING B760M WIFI D4)
+
+Flash a known-good BIOS first — this EFI was validated on **BIOS 1836**. Enter the firmware
+setup with `Del` / `F2` and apply the following (use the `F9` search if a menu name differs):
+
+**Boot / Security**
+
+| Setting                            | Value |
+| ---------------------------------- | ----- |
+| Fast Boot                          | **Disabled** |
+| Secure Boot → OS Type              | **Other OS** (or Secure Boot **Disabled**) |
+| CSM (Compatibility Support Module) | **Disabled** (pure UEFI) |
+
+**Advanced → CPU Configuration**
+
+| Setting                                | Value |
+| -------------------------------------- | ----- |
+| Intel Virtualization Technology (VT-x) | **Enabled** |
+| Intel VT-d                             | **Enabled** (the `DisableIoMapper` quirk handles it) |
+| CFG Lock                               | **Disabled** if exposed; otherwise keep default (the `AppleXcpmCfgLock` quirk covers it) |
+| Intel SGX                              | **Disabled** (if present) |
+
+**Advanced → System Agent (SA) Configuration**
+
+| Setting              | Value |
+| -------------------- | ----- |
+| Above 4G Decoding    | **Enabled** |
+| Re-Size BAR Support  | **Disabled** (safest; enable only if your GPU/driver tolerates it) |
+
+**Advanced → PCH Storage Configuration**
+
+| Setting   | Value |
+| --------- | ----- |
+| SATA Mode | **AHCI** |
+
+**Advanced → USB Configuration**
+
+| Setting       | Value |
+| ------------- | ----- |
+| XHCI Hand-off | **Enabled** |
+
+**Advanced → PCH-FW / Trusted Computing**
+
+| Setting                                      | Value |
+| -------------------------------------------- | ----- |
+| Intel Platform Trust Technology (PTT / fTPM) | **Disabled** |
+
+**Advanced → Onboard Devices Configuration**
+
+| Setting                     | Value |
+| --------------------------- | ----- |
+| Serial Port / Parallel Port | **Disabled** (avoids macOS resource conflicts) |
+
+Save with `F10`, then boot the USB / OpenCore entry and press **Reset NVRAM** once in the
+OpenCore picker before installing.
+
+---
+
 ## Installation / Deployment
 
 ### 1. Prepare a bootable macOS installer
@@ -102,19 +160,8 @@ Copy the **entire `EFI/` folder** from this repo to the root of the EFI partitio
 /Volumes/EFI/EFI/OC/...
 ```
 
-### 4. BIOS settings (recommended)
-| Setting                    | Value            |
-| -------------------------- | ---------------- |
-| Fast Boot                  | Disabled         |
-| Secure Boot                | Disabled         |
-| CSM / Compatibility Support| Disabled (UEFI)  |
-| Above 4G Decoding          | Enabled          |
-| SATA Mode                  | AHCI             |
-| XHCI Hand-off              | Enabled          |
-| VT-d                       | Enabled* (quirk handles it) |
-| CFG Lock                   | Disabled if possible (quirk `AppleXcpmCfgLock` is enabled as fallback) |
-
-\* `DisableIoMapper`/related quirks are configured; leaving VT-d on is fine.
+### 4. Configure the BIOS
+Apply the settings in **[BIOS Settings](#bios-settings-asus-tx-gaming-b760m-wifi-d4)** above.
 
 ### 5. Boot
 Select the OpenCore entry (or `BOOTx64.efi`) from your firmware boot menu. On first boot
